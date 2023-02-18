@@ -1,0 +1,12 @@
+{
+    "ipfs": {
+        "peers": []
+    },
+    "manifest": {
+        "address": "",
+        "options": {}
+    },
+    "store": {
+        "options": {}
+    }
+}

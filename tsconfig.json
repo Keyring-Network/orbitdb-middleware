@@ -1,0 +1,23 @@
+{
+  "ts-node": {
+    "esm": true
+  },
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "declarationDir": "types",
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir":"src"
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": [
+    "**/tests",
+    "**/*.test.js",
+    "**/**/*.test.js",
+  ]
+}
