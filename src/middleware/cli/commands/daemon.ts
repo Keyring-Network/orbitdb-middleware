@@ -28,15 +28,20 @@ const command = {
         logger.info(`IPFS Peer ID: ${(await ipfs.id()).id}`)
         
         const orbitdb = await OrbitDB.createInstance(ipfs, config.orbitdb)
+        
+        const manifest = await orbitdb.keyvalue(config.manifest.address, config.manifest.options)
+        
         const rpc = new RPC(
             config,
-            orbitdb
+            orbitdb,
+            manifest
         )
         
         const daemon = new Daemon(
             config,
             orbitdb,
-            rpc
+            manifest,
+            rpc,
         )
         
         logger.info(`OrbitDB Identity: ${orbitdb.identity.id} (${orbitdb.identity.publicKey})`)

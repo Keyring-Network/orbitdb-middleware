@@ -24,32 +24,27 @@ export type DaemonConfig = {
 }
 
 export class Daemon {
-    public manifest: OrbitDB.KeyValueStore
-
     constructor(
         public config: DaemonConfig,
         public orbitdb: OrbitDB,
-        public rpc: RPC
+        public manifest: OrbitDB.KeyValueStore,
+        public rpc: RPC,
     ) { }
     
     async start() {
-        this.manifest = await this.orbitdb.keyvalue(this.config.manifest.address, this.config.manifest.options).then((manifest) => {
-            manifest.events.on('replicated', (address) => this.handleManifestReplication())
-            manifest.events.on('ready', () => this.handleManifestReplication())
-            
-            return manifest
-        })
+        this.manifest.events.on('replicated', () => this.handleManifestReplication())
+        this.manifest.events.on('write', () => this.handleManifestReplication())
+        this.manifest.events.on('ready', () => this.handleManifestReplication())
     
         return Promise.all([
             this.manifest.load(),
-            this.rpc.start()
         ])
     }
     
     async stop() {
         return Promise.all([
-            await this.orbitdb.stop(),
-            await this.rpc.stop()
+            this.orbitdb.stop(),
+            this.rpc.stop()
         ])
     }
     
@@ -71,9 +66,9 @@ export class Daemon {
         
         return Promise.all([
             removedStoreClose,
-            newStores
+            newStores,
         ]).then(() => Promise.all(Object.entries(this.manifest.all)
             .map((address, heads) => this.orbitdb.stores[address]?._replicator._addToQueue(heads))
-        ))
+        )).then(() => this.rpc.refresh(newStoreAddrs, removedStoreAddrs))
     }
 }

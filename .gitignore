@@ -1,2 +1,4 @@
 orbitdb/
 node_modules
+config.dev.json
+test.js

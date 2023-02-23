@@ -8,5 +8,8 @@
     },
     "store": {
         "options": {}
+    },
+    "socketio": {
+        
     }
 }

@@ -18,10 +18,10 @@ export type DaemonConfig = {
 export declare class Daemon {
     config: DaemonConfig;
     orbitdb: OrbitDB;
-    rpc: RPC;
     manifest: OrbitDB.KeyValueStore;
-    constructor(config: DaemonConfig, orbitdb: OrbitDB, rpc: RPC);
-    start(): Promise<[any, void]>;
-    stop(): Promise<[any, void]>;
-    handleManifestReplication(): Promise<any[]>;
+    rpc: RPC;
+    constructor(config: DaemonConfig, orbitdb: OrbitDB, manifest: OrbitDB.KeyValueStore, rpc: RPC);
+    start(): Promise<[any]>;
+    stop(): Promise<[any, unknown]>;
+    handleManifestReplication(): Promise<void>;
 }

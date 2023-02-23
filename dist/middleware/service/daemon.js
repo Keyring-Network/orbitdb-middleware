@@ -3,28 +3,26 @@ const logger = Logger.create('daemon-service');
 export class Daemon {
     config;
     orbitdb;
-    rpc;
     manifest;
-    constructor(config, orbitdb, rpc) {
+    rpc;
+    constructor(config, orbitdb, manifest, rpc) {
         this.config = config;
         this.orbitdb = orbitdb;
+        this.manifest = manifest;
         this.rpc = rpc;
     }
     async start() {
-        this.manifest = await this.orbitdb.keyvalue(this.config.manifest.address, this.config.manifest.options).then((manifest) => {
-            manifest.events.on('replicated', (address) => this.handleManifestReplication());
-            manifest.events.on('ready', () => this.handleManifestReplication());
-            return manifest;
-        });
+        this.manifest.events.on('replicated', () => this.handleManifestReplication());
+        this.manifest.events.on('write', () => this.handleManifestReplication());
+        this.manifest.events.on('ready', () => this.handleManifestReplication());
         return Promise.all([
             this.manifest.load(),
-            this.rpc.start()
         ]);
     }
     async stop() {
         return Promise.all([
-            await this.orbitdb.stop(),
-            await this.rpc.stop()
+            this.orbitdb.stop(),
+            this.rpc.stop()
         ]);
     }
     async handleManifestReplication() {
@@ -40,8 +38,8 @@ export class Daemon {
         logger.info(`Following ${newStoreAddrs.length} new stores`);
         return Promise.all([
             removedStoreClose,
-            newStores
+            newStores,
         ]).then(() => Promise.all(Object.entries(this.manifest.all)
-            .map((address, heads) => this.orbitdb.stores[address]?._replicator._addToQueue(heads))));
+            .map((address, heads) => this.orbitdb.stores[address]?._replicator._addToQueue(heads)))).then(() => this.rpc.refresh(newStoreAddrs, removedStoreAddrs));
     }
 }

@@ -15,8 +15,9 @@ const command = {
         logger.info(`Node.js version: ${process.versions.node}`);
         logger.info(`IPFS Peer ID: ${(await ipfs.id()).id}`);
         const orbitdb = await OrbitDB.createInstance(ipfs, config.orbitdb);
-        const rpc = new RPC(config, orbitdb);
-        const daemon = new Daemon(config, orbitdb, rpc);
+        const manifest = await orbitdb.keyvalue(config.manifest.address, config.manifest.options);
+        const rpc = new RPC(config, orbitdb, manifest);
+        const daemon = new Daemon(config, orbitdb, manifest, rpc);
         logger.info(`OrbitDB Identity: ${orbitdb.identity.id} (${orbitdb.identity.publicKey})`);
         await daemon.start();
         logger.info('OrbitDB Middleware daemon is ready');
